@@ -6,3 +6,110 @@ body {
 h2 {
     color: #2c3e50;
 }
+
+/* Make all heading elements bold, overriding other styles */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold !important;
+}
+
+/* Style for logos next to list items */
+.logo {
+    width: 70px; /* Adjust the size as needed */
+    height: 70px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* Optional: Enhance list item alignment using Flexbox */
+ul1 {
+    list-style: none; /* Remove default bullets */
+    padding: 0;
+}
+
+li1 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Space between items */
+}
+
+/* custom.css */
+
+/* Container for the slide */
+.slide-with-bg-img .slide-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: relative;
+}
+
+// Function to load the YouTube IFrame API
+    function loadYouTubeAPI(callback) {
+        // Check if the API is already loaded
+        if (window.YT && window.YT.Player) {
+            callback();
+        } else {
+            // Create a script tag to load the YouTube IFrame API
+            let tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            let firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // Define the callback for when the API is ready
+            window.onYouTubeIframeAPIReady = callback;
+        }
+    }
+
+    // Request full screen for a given element
+    function requestFullScreen(element) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) { // Firefox
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) { // Chrome, Safari and Opera
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) { // IE/Edge
+            element.msRequestFullscreen();
+        }
+    }
+
+    // Initialize YouTube Players
+    function initializeYouTubePlayers() {
+        videos.forEach(video => {
+            players[video.id] = new YT.Player(video.id, {
+                height: window.innerHeight,
+                width: window.innerWidth,
+                videoId: video.videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'start': video.startSeconds,
+                    'end': video.endSeconds,
+                    'mute': 1, // Mute the video
+                    'rel': 0, // Do not show related videos
+                    'showinfo': 0, // Do not show video info
+                    'modestbranding': 1, // Minimal YouTube branding
+                    'iv_load_policy': 3, // Do not show video annotations
+                    'fs': 1, // Allow fullscreen
+                    'playsinline': 1, // Play inline on mobile devices
+                    'vq': 'hd720' // Play video in 720p
+                },
+                events: {
+                    'onReady': (event) => {
+                        event.target.playVideo();
+                        event.target.mute(); // Ensure the video is muted
+                        requestFullScreen(event.target.getIframe());
+                    },
+                    'onStateChange': (event) => {
+                        if (event.data == YT.PlayerState.ENDED) {
+                            event.target.seekTo(video.startSeconds);
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Load the YouTube IFrame API and initialize players
+    loadYouTubeAPI(initializeYouTubePlayers);
+});
